@@ -1,1 +1,1 @@
-token=MzUwMTAyNTAzMDU4MTc4MDU5.DH_J4g.dczVLDSTRSgsvWdTFGUHkEJ2OOM
+token=<discord_bot_token>
