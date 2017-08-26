@@ -13,5 +13,5 @@ gith({
     exec(' cd ../ && pm2 deploy ecosystem.json.js --force', (err, stdout, stderr) => {
         console.log('stdout:', stdout);
         console.log('stderr:', stderr);
-    );
+    });
 });
