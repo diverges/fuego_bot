@@ -26,7 +26,7 @@ client.on('ready', () => {
 // Log our bot in
 if(process || process.env || process.env.prodduction)
 {
-	client.login(process.env.prodduction['token']);
+	client.login(process.env.prodduction['TOKEN']);
 	console.log('Production Env Loaded...\n');
 } else {
 	client.login(load.config.init['token']);
