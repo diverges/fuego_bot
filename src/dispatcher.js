@@ -6,9 +6,16 @@ class CommandDispatcher extends EventEmitter {
         this.client = client;
 
         client.on('message', message => {
-            var index = config.commands.indexOf(message.content);
-            if(index >= 0)
-                this.emit(config.commands[index], message);
+            
+            // Ignore messages from bots
+            if(message.author.bot) return;
+            
+            if(!message.content.startsWith(config.init['cmd_token'])) return;
+            
+            var command = message.content.substring(1).split(' ')[0];
+            if(config.commands.indexOf(command) >= 0) {
+                this.emit(command, message);
+            }
         });
     }
 

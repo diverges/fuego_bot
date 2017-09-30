@@ -8,7 +8,7 @@ function FileToObj(buffer) {
 
     split.forEach(function(line) {
         var index = line.indexOf('=');
-        if(index > 0) {
+        if( !line.startsWith('#') && index > 0) {
             ret[line.substr(0, index)] = line.substr(index+1);
         }
     });
