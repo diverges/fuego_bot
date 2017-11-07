@@ -15,11 +15,13 @@ const dispatcherInstance = new dispatcher(client, load.config);
 // commands
 const ping = require('./src/commands/ping.js');
 const bro = require('./src/commands/bro.js');
+const wrong = require('./src/commands/wrong.js');
 
 // Setup listeners
 client.on('ready', () => {
     ping(client, dispatcherInstance);
 	bro(client, dispatcherInstance);
+	wrong(client, dispatcherInstance);
     console.log('I am ready!');
 });
 
