@@ -42,8 +42,10 @@ process.on('SIGINT', function() {
     if(running)
     {
         running = false;
-        client.destroy();
-        console.log('Cleanup finished');
+        client.destroy().then(function()
+        {
+            console.log('Cleanup finished');
+            process.exit()
+        });
     }
-    process.exit();
 });
