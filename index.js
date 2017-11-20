@@ -34,3 +34,16 @@ if(process && process.env && process.env.TOKEN)
 	client.login(load.config.init['token']);
 }
 
+var running = true;
+
+// Handle app reload
+process.on('SIGINT', function() {
+    console.log('sigint received...');
+    if(running)
+    {
+        running = false;
+        client.destroy();
+        console.log('Cleanup finished');
+    }
+    process.exit();
+});
