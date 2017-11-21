@@ -15,11 +15,13 @@ const dispatcherInstance = new dispatcher(discordClient, load.config);
 const ping = require('./src/commands/ping.js');
 const bro = require('./src/commands/bro.js');
 const get_turkey = require('./src/intent/get_turkey.js');
+const wrong = require('./src/commands/wrong.js');
 
 // Setup listeners
 discordClient.on('ready', () => {
     ping(discordClient, dispatcherInstance);
 	bro(discordClient, dispatcherInstance);
+	wrong(discordClient, dispatcherInstance);
     get_turkey(discordClient, dispatcherInstance);
     console.log('I am ready!');
 });
