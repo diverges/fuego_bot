@@ -6,6 +6,12 @@ const discordClient = new Discord.Client();
 const load = require('./src/load.js');
 load.loadConfig();
 
+// overwrite config with prod settings
+if(load.config._prod_init !== undefined)
+{
+    load.config.init = load.config._prod_init;
+}
+
 console.log(load.config);
 
 const dispatcher = require('./src/dispatcher.js');
@@ -27,13 +33,7 @@ discordClient.on('ready', () => {
 });
 
 // Log our bot in
-if(process && process.env && process.env.TOKEN)
-{
-	discordClient.login(process.env.TOKEN);
-	console.log('Production Env Loaded...\n');
-} else {
-	discordClient.login(load.config.init['discord_token']);
-}
+discordClient.login(load.config.init['discord_token']);
 
 var running = true;
 
