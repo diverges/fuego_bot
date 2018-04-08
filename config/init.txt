@@ -1,5 +1,5 @@
 # Discord Token
-discord_token=<discord_token>
+discord_token=MzQ5NzcyNzcxNDQ3OTMwODg0.Dar2xg.MmWh3567CtLaF9axBZ90Rm078b8
 
 #Wit.ai Access Token
 wit_token=<wit_ai_token>
