@@ -1,15 +1,18 @@
-const EventEmitter = require('events');
-// Wit.ai
-const WitAi = require('node-wit').Wit;
+import * as EventEmitter from 'events';
+import * as Discord from 'discord.js';
+import { Wit } from 'node-wit'; // Wit.ai
+import { BaseCommand } from './baseCommand';
 
-class CommandDispatcher extends EventEmitter {
-    constructor(client, config) {
+export default class CommandDispatcher extends EventEmitter {
+    private client : any;
+    private witAi : Wit;
+
+    constructor(client : Discord.Client, config : any) {
         super();
         this.client = client;
-        this.witAi = (config.init['wit_token']) ? new WitAi({ accessToken: config.init['wit_token']}) : undefined;
+        this.witAi = (config.init['wit_token']) ? new Wit({ accessToken: config.init['wit_token']}) : undefined;
 
-        client.on('message', message => {
-            
+        client.on('message', (message : Discord.Message) => {
             // Ignore messages from bots
             if(message.author.bot) return;
             
@@ -21,14 +24,14 @@ class CommandDispatcher extends EventEmitter {
                     this.emit(command, message);
                 }
             } 
-            else if (message.mentions && message.mentions.users.has(client.user.id ))
+            else if (this.witAi && message.mentions && message.mentions.users.has(client.user.id ))
             {
                 // bot was mentioned, send to wit.ai and emit intent
                 this.witAi.message(message.content, {})
                 .then((data) => {
                     if(data.entities && data.entities.intent)
                     {
-                        this.emit(data.entities.intent[0].value, { msg: message, entities: data.entities});
+                        this.emit(data.entities.intent[0].value, message);
                         console.log('message intent: ' + data.entities.intent[0].value);
                     }
                 })
@@ -36,6 +39,7 @@ class CommandDispatcher extends EventEmitter {
         });
     }
 
+    public addCommand(command : BaseCommand) : void {
+        this.on(command.getName(), command.onCallback);
+    }
 }
-
-module.exports = CommandDispatcher;
