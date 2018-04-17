@@ -9,6 +9,7 @@ import Wrong from './src/commands/wrong.js';
 import GetTurkey from './src/intent/get_turkey';
 import Sue from './src/commands/sue';
 
+
 let Running : boolean = false;
 
 class App {
@@ -36,6 +37,7 @@ class App {
         this.dispatcher.addCommand(new Bro());
         this.dispatcher.addCommand(new Wrong());
         this.dispatcher.addCommand(new Sue());
+
 
         // wit.ai
         this.dispatcher.addCommand(new GetTurkey())
