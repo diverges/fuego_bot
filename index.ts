@@ -7,6 +7,7 @@ import Ping from './src/commands/ping';
 import Bro from './src/commands/bro.js';
 import Wrong from './src/commands/wrong.js';
 import GetTurkey from './src/intent/get_turkey';
+import Sue from './src/commands/sue';
 
 let Running : boolean = false;
 
@@ -34,6 +35,7 @@ class App {
         this.dispatcher.addCommand(new Ping());
         this.dispatcher.addCommand(new Bro());
         this.dispatcher.addCommand(new Wrong());
+        this.dispatcher.addCommand(new Sue());
 
         // wit.ai
         this.dispatcher.addCommand(new GetTurkey())
