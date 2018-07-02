@@ -1,5 +1,8 @@
 # Discord Token
-token=<bot_token>
+discord_token=<discord_token>
+
+#Wit.ai Access Token
+wit_token=<wit_ai_token>
 
 # Bot Command Token:
 #   Default command initializer, bot listens for messages starting with this character.
