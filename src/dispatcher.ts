@@ -35,7 +35,15 @@ export default class CommandDispatcher extends EventEmitter {
                         console.log('message intent: ' + data.entities.intent[0].value);
                     }
                 })
-            } 
+            } else if (message.embeds.length > 0) {
+                for (const msg of message.embeds) {
+                    msg.message.react('🔥').then((value) => value.message.react('🍆'))
+                }
+            } else if (message.attachments.array().length > 0) {
+                message.attachments.map((value) => {
+                    value.message.react('🔥').then((v) => v.message.react('🍆'))
+                })
+            }
         });
     }
 
