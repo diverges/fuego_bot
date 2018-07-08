@@ -1,18 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
-    "outDir": "dist",
-    "sourceMap": true
+      "module": "commonjs",
+      "target": "es6",
+      "noImplicitAny": true,
+      "moduleResolution": "node",
+      "sourceMap": true,
+      "outDir": "dist",
   },
-  "files": [
-    "./node_modules/@types/node/index.d.ts"
-  ],
   "include": [
-    "src/**/*.ts",
-    "index.ts"
-  ],
-  "exclude": [
-    "node_modules"
+      "src/**/*"
   ]
 }
