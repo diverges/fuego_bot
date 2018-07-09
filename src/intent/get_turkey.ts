@@ -1,5 +1,5 @@
-import { BaseCommand } from "../baseCommand";
-import { Message } from "discord.js";
+import { BaseCommand } from '../baseCommand';
+import { Message } from 'discord.js';
 
 const millisecondsInADay = (1000 * 60 * 60 * 24);
 const turkeyConstant = 4;
@@ -7,7 +7,7 @@ const turkeyConstant = 4;
 export default class GetTurkey extends BaseCommand {
 
     public getName(): string {
-        return "get_turkey";
+        return 'get_turkey';
     }
 
     public onCallback(payload: Message): void {
@@ -21,7 +21,7 @@ export default class GetTurkey extends BaseCommand {
         const days = (turkeyDay.getTime() - curDate.getTime()) / (millisecondsInADay);
 
         const weight = Math.round(days * turkeyConstant);
-        payload.reply("Get your turkey out to thaw if it's " + weight + "lbs or more! This is your " + weight + "lb warning.");
+        payload.reply("Get your turkey out to thaw if it's " + weight + 'lbs or more! This is your ' + weight + 'lb warning.');
     }
 
     private static getTurkeyDate(year: number): Date {

@@ -1,12 +1,12 @@
-import * as Discord from "discord.js";
-import Load from "./load.js";
-import Dispatcher from "./dispatcher.js";
+import * as Discord from 'discord.js';
+import Load from './load.js';
+import Dispatcher from './dispatcher.js';
 
 // commands
-import Ping from "./commands/ping";
-import Wrong from "./commands/wrong.js";
-import GetTurkey from "./intent/get_turkey";
-import Sue from "./commands/sue";
+import Ping from './commands/ping';
+import Wrong from './commands/wrong.js';
+import GetTurkey from './intent/get_turkey';
+import Sue from './commands/sue';
 
 let running: boolean = false;
 
@@ -28,16 +28,16 @@ class App {
     }
 
     login() {
-        if (this.config.init["discord_token"]) {
-            console.log("Logging client in...");
-            this.client.login(this.config.init["discord_token"]).then((message) => {
+        if (this.config.init['discord_token']) {
+            console.log('Logging client in...');
+            this.client.login(this.config.init['discord_token']).then((message) => {
                 running = true;
             }).catch((error) => {
-                console.log("Login error: " + error);
+                console.log('Login error: ' + error);
                 this.exit();
             });
         } else {
-            console.log("Missing discord_token");
+            console.log('Missing discord_token');
             this.exit();
         }
     }
@@ -62,12 +62,12 @@ class App {
     }
 
     onExit(): void {
-        console.log("App closing...");
+        console.log('App closing...');
         if (running) {
             running = false;
-            console.log("Closing client...");
+            console.log('Closing client...');
             this.client.destroy().then(function () {
-                console.log("Client closed!");
+                console.log('Client closed!');
                 process.exit();
             });
         }
@@ -76,6 +76,6 @@ class App {
 
 const MainApp: App = new App();
 
-process.on("SIGINT", () => MainApp.onExit());
+process.on('SIGINT', () => MainApp.onExit());
 
 export default MainApp;
