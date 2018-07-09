@@ -1,7 +1,7 @@
 import { BaseCommand } from '../baseCommand';
 import { TextChannel, Message, MessageSearchOptions, MessageSearchResult } from 'discord.js';
 
-export default class Sue extends BaseCommand {
+export class Sue extends BaseCommand {
     public getName(): string {
         return 'sue';
     }

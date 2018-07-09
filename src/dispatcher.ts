@@ -1,36 +1,34 @@
 import * as EventEmitter from 'events';
 import * as Discord from 'discord.js';
-import { Wit } from 'node-wit'; // Wit.ai
+import { Wit, MessageResponse } from 'node-wit'; // Wit.ai
 import { BaseCommand } from './baseCommand';
 
+// Guild -> (Upvote, Downvote)
+class EmojiCollection {
+    [id: string]: {
+        Upvote: string, Downvote: string
+    }
+
+    static get Default(): { Upvote: string, Downvote: string } {
+        return { Upvote: '🔥', Downvote: '🍆'}; // default
+    }
+}
+
 export default class CommandDispatcher extends EventEmitter {
-    private client: Discord.Client;
     private config: any;
     private witAi: Wit;
-    private upvote: Discord.Emoji;
-    private downvote: Discord.Emoji;
+    private emojiCache: EmojiCollection; // Emoji id's per guild
 
-    constructor(client: Discord.Client, config: any) {
+    constructor(config: any) {
         super();
-        this.client = client;
         this.config = config;
+        this.emojiCache = new EmojiCollection();
         if (config && config.init) {
             this.witAi = (config.init['wit_token']) ? new Wit({ accessToken: config.init['wit_token'] }) : undefined;
         }
-        client.on('ready', () => {
-            console.log('Client Logged in!');
-            this.refreshEmojis();
-        });
-        client.on('emojiCreate', () => { this.refreshEmojis(); });
-        client.on('emojiDelete', () => { this.refreshEmojis(); });
-        client.on('emojiUpdate', () => { this.refreshEmojis(); });
-        client.on('messageUpdate', (oldMessage: Discord.Message, newMessage: Discord.Message) => {
-            this.sendUpvoteDownvote(newMessage);
-        });
-        client.on('message', this.OnMessage.bind(this));
     }
 
-    private async OnMessage (message: Discord.Message): Promise<void> {
+    public async OnMessage (message: Discord.Message): Promise<void> {
         // Ignore messages from bots
         if (message.author.bot) return;
 
@@ -41,38 +39,59 @@ export default class CommandDispatcher extends EventEmitter {
                 this.emit(command, message);
             }
         }
-        else if (this.witAi && message.mentions && message.mentions.users.has(this.client.user.id)) {
+        else if (this.witAi && message.mentions && message.mentions.users.has(message.client.user.id)) {
             // bot was mentioned, send to wit.ai and emit intent
-            this.witAi.message(message.content, {})
-                .then((data) => {
-                    if (data.entities && data.entities.intent) {
-                        this.emit(data.entities.intent[0].value, message);
-                        console.log('message intent: ' + data.entities.intent[0].value);
-                    }
-                });
-        } else if (message.embeds.length > 0 || message.attachments.array().length > 0) {
-            this.sendUpvoteDownvote(message);
-        }
-    }
-
-    private sendUpvoteDownvote(message: Discord.Message) {
-        if (this.upvote && this.downvote) {
-            if (this.client.emojis.get(this.upvote.id) && this.client.emojis.get(this.downvote.id))
-                message.react(this.upvote).then((value) => value.message.react(this.downvote));
-        }
-    }
-
-    private refreshEmojis() {
-        console.log('Refreshing Emojis...');
-        this.client.emojis.forEach(emoji => {
-            if (emoji.name.indexOf('upvote') !== -1) {
-                console.log('Found Upvote Emoji: ' + emoji.id);
-                this.upvote = emoji;
-            } else if (emoji.name.indexOf('downvote') !== -1) {
-                console.log('Found Downvote Emoji: ' + emoji.id);
-                this.downvote = emoji;
+            const data: MessageResponse = await this.witAi.message(message.content, {});
+            if (data.entities && data.entities.intent) {
+                this.emit(data.entities.intent[0].value, message);
+                console.log('message intent: ' + data.entities.intent[0].value);
             }
+        } else if (message.embeds.length > 0 || message.attachments.array().length > 0) {
+            return this.sendUpvoteDownvote(message);
+        }
+    }
+
+    public OnEmojiDelete(emoji: Discord.Emoji): void {
+        const id = emoji.guild.id;
+        if (!this.emojiCache[id]) {
+            this.emojiCache[id] = EmojiCollection.Default;
+        }
+        if (emoji.name === 'upvote') {
+            this.emojiCache[id].Upvote = '🔥';
+        }
+        if (emoji.name === 'downvote') {
+            this.emojiCache[id].Downvote = '🍆';
+        }
+    }
+
+    public OnEmojiUpdate(emoji: Discord.Emoji): void {
+        const id = emoji.guild.id;
+        if (!this.emojiCache[id]) {
+            this.emojiCache[id] = EmojiCollection.Default;
+        }
+        if (emoji.name === 'upvote') {
+            this.emojiCache[id].Upvote = emoji.id;
+        }
+        if (emoji.name === 'downvote') {
+            this.emojiCache[id].Downvote = emoji.id;
+        }
+    }
+
+    private GetEmojiFromCollection(emojis: Discord.Collection<Discord.Snowflake, Discord.Emoji>): void {
+        emojis.forEach((emoji: Discord.Emoji) => {
+            this.OnEmojiUpdate(emoji);
         });
+    }
+
+    private async sendUpvoteDownvote(message: Discord.Message): Promise<void> {
+        if (!this.emojiCache[message.guild.id]) {
+            this.emojiCache[message.guild.id] = EmojiCollection.Default;
+            this.GetEmojiFromCollection(message.client.emojis);
+        }
+
+        const guildEmoji = this.emojiCache[message.guild.id];
+        await message.react(guildEmoji.Upvote);
+        await message.react(guildEmoji.Downvote);
     }
 
     public addCommand(command: BaseCommand): void {

@@ -3,10 +3,8 @@ import Load from './load.js';
 import Dispatcher from './dispatcher.js';
 
 // commands
-import Ping from './commands/ping';
-import Wrong from './commands/wrong.js';
-import GetTurkey from './intent/get_turkey';
-import Sue from './commands/sue';
+import { Ping, Wrong, Sue } from './commands';
+import { GetTurkey } from './intent';
 
 let running: boolean = false;
 
@@ -18,39 +16,32 @@ class App {
     constructor() {
         this.client = new Discord.Client();
         this.config = Load.getConfig();
-        // Uncomment for debugging purposes only!
-        // console.log(this.config);
+    }
 
+    public async login(): Promise<void> {
+        if (!this.config.init['discord_token']) {
+            throw new Error('Discord token in config/init must be defined.');
+        }
+
+        // Dispatcher
         this.initDispatcher();
 
-        // Log our bot in
-        this.login();
-    }
+        // Login
+        console.log('Logging client in...');
+        await this.client.login(this.config.init['discord_token']);
 
-    login() {
-        if (this.config.init['discord_token']) {
-            console.log('Logging client in...');
-            this.client.login(this.config.init['discord_token']).then((message) => {
-                running = true;
-            }).catch((error) => {
-                console.log('Login error: ' + error);
-                this.exit();
-            });
-        } else {
-            console.log('Missing discord_token');
-            this.exit();
-        }
-    }
+        // Events
+        this.client.on('message', this.dispatcher.OnMessage.bind(this.dispatcher));
+        this.client.on('emojiUpdate', (oldEmoji, newEmoji: Discord.Emoji) => {
+            this.dispatcher.OnEmojiUpdate(newEmoji);
+        });
+        this.client.on('emojiDelete', this.dispatcher.OnEmojiDelete.bind(this.dispatcher));
 
-    exit(): void {
-        if (module.exports.abort) {
-            process.abort();
-        }
-        process.exit(0);
+        running = true;
     }
 
     initDispatcher(): void {
-        this.dispatcher = new Dispatcher(this.client, this.config);
+        this.dispatcher = new Dispatcher(this.config);
 
         // commands
         this.dispatcher.addCommand(new Ping());
@@ -77,5 +68,10 @@ class App {
 const MainApp: App = new App();
 
 process.on('SIGINT', () => MainApp.onExit());
+
+MainApp.login().catch(error => {
+    console.log(error);
+    this.exit();
+});
 
 export default MainApp;

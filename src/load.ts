@@ -18,7 +18,7 @@ export default class Load {
     private static loadConfig(): any {
         const getFileStr = (name: string) => name.substr(0, name.indexOf('.'));
         const filenames = fs.readdirSync(configDir);
-        const commandNames = fs.readdirSync(cmdDir);
+        const commandNames = fs.readdirSync(cmdDir).filter(elem => elem != 'index');
         const data: any = {
             commands: commandNames.map(getFileStr)
         };

@@ -4,7 +4,7 @@ import { Message } from 'discord.js';
 const millisecondsInADay = (1000 * 60 * 60 * 24);
 const turkeyConstant = 4;
 
-export default class GetTurkey extends BaseCommand {
+export class GetTurkey extends BaseCommand {
 
     public getName(): string {
         return 'get_turkey';

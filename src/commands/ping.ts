@@ -1,7 +1,7 @@
 import { BaseCommand } from '../baseCommand';
 import { TextChannel, Message } from 'discord.js';
 
-export default class Ping extends BaseCommand {
+export class Ping extends BaseCommand {
     public getName(): string {
         return 'ping';
     }
