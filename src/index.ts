@@ -36,6 +36,9 @@ class App {
             this.dispatcher.OnEmojiUpdate(newEmoji);
         });
         this.client.on('emojiDelete', this.dispatcher.OnEmojiDelete.bind(this.dispatcher));
+        this.client.on('messageUpdate', (oldMessage: Discord.Message, newMessage: Discord.Message) => {
+            this.dispatcher.sendUpvoteDownvote(newMessage);
+        });
 
         running = true;
     }

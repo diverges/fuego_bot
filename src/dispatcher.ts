@@ -51,6 +51,17 @@ export default class CommandDispatcher extends EventEmitter {
         }
     }
 
+    public async sendUpvoteDownvote(message: Discord.Message): Promise<void> {
+        if (!this.emojiCache[message.guild.id]) {
+            this.emojiCache[message.guild.id] = EmojiCollection.Default;
+            this.GetEmojiFromCollection(message.client.emojis);
+        }
+
+        const guildEmoji = this.emojiCache[message.guild.id];
+        await message.react(guildEmoji.Upvote);
+        await message.react(guildEmoji.Downvote);
+    }
+
     public OnEmojiDelete(emoji: Discord.Emoji): void {
         const id = emoji.guild.id;
         if (!this.emojiCache[id]) {
@@ -81,17 +92,6 @@ export default class CommandDispatcher extends EventEmitter {
         emojis.forEach((emoji: Discord.Emoji) => {
             this.OnEmojiUpdate(emoji);
         });
-    }
-
-    private async sendUpvoteDownvote(message: Discord.Message): Promise<void> {
-        if (!this.emojiCache[message.guild.id]) {
-            this.emojiCache[message.guild.id] = EmojiCollection.Default;
-            this.GetEmojiFromCollection(message.client.emojis);
-        }
-
-        const guildEmoji = this.emojiCache[message.guild.id];
-        await message.react(guildEmoji.Upvote);
-        await message.react(guildEmoji.Downvote);
     }
 
     public addCommand(command: BaseCommand): void {
