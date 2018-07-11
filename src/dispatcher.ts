@@ -2,6 +2,10 @@ import * as EventEmitter from 'events';
 import * as Discord from 'discord.js';
 import { Wit, MessageResponse } from 'node-wit'; // Wit.ai
 import { BaseCommand } from './baseCommand';
+import { GuildMember, TextChannel } from 'discord.js';
+import { fork } from 'child_process';
+import * as path from 'path';
+import FuzzySet = require('fuzzyset.js');
 
 // Guild -> (Upvote, Downvote)
 class EmojiCollection {
@@ -47,7 +51,14 @@ export default class CommandDispatcher extends EventEmitter {
                 console.log('message intent: ' + data.entities.intent[0].value);
             }
         } else if (message.embeds.length > 0 || message.attachments.array().length > 0) {
+            this.checkImageForUsers(message);
             return this.sendUpvoteDownvote(message);
+        } else if (message.cleanContent.length < 15) {
+            const fd = FuzzySet(['now what', 'what now']);
+            const res = fd.get(message.cleanContent, undefined, 0.75);
+            if (res[0] && res[0][0] > 0.8) {
+                message.reply('🍆', {reply: message.author});
+            }
         }
     }
 
@@ -96,5 +107,36 @@ export default class CommandDispatcher extends EventEmitter {
 
     public addCommand(command: BaseCommand): void {
         this.on(command.getName(), command.onCallback);
+    }
+
+    public checkImageForUsers(message: Discord.Message): void {
+        const media: Array<string> = [];
+        for (const em of message.embeds) {
+            media.push(em.url);
+        }
+        for (const at of message.attachments.array()) {
+            media.push(at.url);
+        }
+        const names: Map<string, GuildMember> = new Map<string, GuildMember>();
+        if (message.channel instanceof TextChannel) {
+            for (const member of message.channel.members.array()) {
+                names.set(member.displayName, member);
+            }
+        }
+        for (const url of media) {
+            if (url.indexOf('.png') > -1) {
+                const compute = fork(path.join(__dirname, 'forks/ocr.js'));
+                compute.send(url);
+                compute.on('message', (text) => {
+                    const mentions: Array<GuildMember> = [];
+                    names.forEach((value, key) => {
+                        if (text.indexOf(key) > -1) {
+                            mentions.push(value);
+                        }
+                    });
+                    mentions.forEach(value => message.reply('got got', { reply: value}));
+                });
+            }
+        }
     }
 }
