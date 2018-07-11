@@ -28,70 +28,27 @@ export default class CommandDispatcher extends EventEmitter {
         }
     }
 
-    public async OnMessage (message: Discord.Message): Promise<void> {
+    public async onMessage (message: Discord.Message): Promise<void> {
         // Ignore messages from bots
         if (message.author.bot) return;
 
         if (message.content.startsWith(this.config.init['cmd_token'])) {
-            // basic command eg. /ping
-            const command = message.content.substring(1).split(' ')[0];
-            if (this.config.commands.indexOf(command) >= 0) {
-                this.emit(command, message);
-            }
+            // // basic command eg. /ping
+            // const command = message.content.substring(1).split(' ')[0];
+            // if (this.config.commands.indexOf(command) >= 0) {
+            //     this.emit(command, message);
+            // }
         }
         else if (this.witAi && message.mentions && message.mentions.users.has(message.client.user.id)) {
-            // bot was mentioned, send to wit.ai and emit intent
-            const data: MessageResponse = await this.witAi.message(message.content, {});
-            if (data.entities && data.entities.intent) {
-                this.emit(data.entities.intent[0].value, message);
-                console.log('message intent: ' + data.entities.intent[0].value);
-            }
+            // // bot was mentioned, send to wit.ai and emit intent
+            // const data: MessageResponse = await this.witAi.message(message.content, {});
+            // if (data.entities && data.entities.intent) {
+            //     this.emit(data.entities.intent[0].value, message);
+            //     console.log('message intent: ' + data.entities.intent[0].value);
+            // }
         } else if (message.embeds.length > 0 || message.attachments.array().length > 0) {
-            return this.sendUpvoteDownvote(message);
+            // return this.sendUpvoteDownvote(message);
         }
-    }
-
-    public async sendUpvoteDownvote(message: Discord.Message): Promise<void> {
-        if (!this.emojiCache[message.guild.id]) {
-            this.emojiCache[message.guild.id] = EmojiCollection.Default;
-            this.GetEmojiFromCollection(message.client.emojis);
-        }
-
-        const guildEmoji = this.emojiCache[message.guild.id];
-        await message.react(guildEmoji.Upvote);
-        await message.react(guildEmoji.Downvote);
-    }
-
-    public OnEmojiDelete(emoji: Discord.Emoji): void {
-        const id = emoji.guild.id;
-        if (!this.emojiCache[id]) {
-            this.emojiCache[id] = EmojiCollection.Default;
-        }
-        if (emoji.name === 'upvote') {
-            this.emojiCache[id].Upvote = '🔥';
-        }
-        if (emoji.name === 'downvote') {
-            this.emojiCache[id].Downvote = '🍆';
-        }
-    }
-
-    public OnEmojiUpdate(emoji: Discord.Emoji): void {
-        const id = emoji.guild.id;
-        if (!this.emojiCache[id]) {
-            this.emojiCache[id] = EmojiCollection.Default;
-        }
-        if (emoji.name === 'upvote') {
-            this.emojiCache[id].Upvote = emoji.id;
-        }
-        if (emoji.name === 'downvote') {
-            this.emojiCache[id].Downvote = emoji.id;
-        }
-    }
-
-    private GetEmojiFromCollection(emojis: Discord.Collection<Discord.Snowflake, Discord.Emoji>): void {
-        emojis.forEach((emoji: Discord.Emoji) => {
-            this.OnEmojiUpdate(emoji);
-        });
     }
 
     public addCommand(command: BaseCommand): void {

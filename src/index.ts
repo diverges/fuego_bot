@@ -5,8 +5,10 @@ import Dispatcher from './dispatcher.js';
 // commands
 import { Ping, Wrong, Sue } from './commands';
 import { GetTurkey } from './intent';
+import { Config } from './config.js';
 
 let running: boolean = false;
+Config.Instance = Load.getConfig();
 
 class App {
     private client: Discord.Client;
@@ -15,7 +17,7 @@ class App {
 
     constructor() {
         this.client = new Discord.Client();
-        this.config = Load.getConfig();
+        this.config = Config.Instance;
     }
 
     public async login(): Promise<void> {
@@ -31,17 +33,7 @@ class App {
         await this.client.login(this.config.init['discord_token']);
 
         // Events
-        this.client.on('message', this.dispatcher.OnMessage.bind(this.dispatcher));
-        this.client.on('emojiUpdate', (oldEmoji, newEmoji: Discord.Emoji) => {
-            this.dispatcher.OnEmojiUpdate(newEmoji);
-        });
-        this.client.on('emojiDelete', this.dispatcher.OnEmojiDelete.bind(this.dispatcher));
-        this.client.on('messageUpdate', (oldMessage: Discord.Message, newMessage: Discord.Message) => {
-            if (newMessage.embeds.length > 0 || newMessage.attachments.array().length > 0) {
-                this.dispatcher.sendUpvoteDownvote(newMessage);
-            }
-        });
-
+        this.client.on('message', this.dispatcher.onMessage.bind(this.dispatcher));
         running = true;
     }
 
