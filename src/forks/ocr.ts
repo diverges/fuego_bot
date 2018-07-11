@@ -38,7 +38,7 @@ process.on('message', (msg) => {
                 .catch((err: Error) => console.error(err))
                 .finally((resultOrError) => {
                     if ('text' in resultOrError) {
-                        console.log(resultOrError.text);
+                        // console.log(resultOrError.text);
                         process.send(resultOrError.text);
                     }
                 });

@@ -5,6 +5,7 @@ import { BaseCommand } from "./baseCommand";
 import {GuildMember, TextChannel} from "discord.js";
 import {fork} from 'child_process';
 import * as path from "path";
+import FuzzySet = require("fuzzyset.js");
 
 // Guild -> (Upvote, Downvote)
 class EmojiCollection {
@@ -52,6 +53,12 @@ export default class CommandDispatcher extends EventEmitter {
         } else if (message.embeds.length > 0 || message.attachments.array().length > 0) {
             this.checkImageForUsers(message);
             return this.sendUpvoteDownvote(message);
+        } else if (message.cleanContent.length < 15) {
+            const fd = FuzzySet(['now what', 'what now']);
+            const res = fd.get(message.cleanContent, undefined, 0.75);
+            if (res[0] && res[0][0] > 0.8) {
+                message.reply('🍆', {reply: message.author})
+            }
         }
     }
 

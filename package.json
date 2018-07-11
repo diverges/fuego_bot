@@ -4,10 +4,12 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "@types/fuzzyset.js": "0.0.1",
     "@types/node-wit": "^4.2.2",
     "@types/shelljs": "^0.7.8",
     "@types/tesseract.js": "0.0.2",
     "discord.js": "^11.3.2",
+    "fuzzyset.js": "0.0.5",
     "jimp": "^0.2.28",
     "node-wit": "^4.3.0",
     "shelljs": "^0.8.1",
