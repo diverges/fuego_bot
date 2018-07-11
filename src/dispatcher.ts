@@ -2,11 +2,9 @@ import * as EventEmitter from 'events';
 import * as Discord from "discord.js";
 import { Wit, MessageResponse } from "node-wit"; // Wit.ai
 import { BaseCommand } from "./baseCommand";
-import * as Tesseract from "tesseract.js"
-import * as path from "path";
-import {Page, Progress} from "tesseract.js";
 import {GuildMember, TextChannel} from "discord.js";
-import * as Jimp from 'jimp';
+import {fork} from 'child_process';
+import * as path from "path";
 
 // Guild -> (Upvote, Downvote)
 class EmojiCollection {
@@ -119,54 +117,17 @@ export default class CommandDispatcher extends EventEmitter {
             }
         }
         for (const url of media) {
-            Jimp.read(url).then(value => {
-                const contrastLVL = 0.6;
-                const thresh = 30;
-                value.scaleToFit(value.bitmap.width*2, value.bitmap.height*2).contrast(contrastLVL).scan(0, 0, value.bitmap.width, value.bitmap.height, function (x, y, idx) {
-                    const red   = this.bitmap.data[idx ];
-                    const green = this.bitmap.data[idx + 1];
-                    const blue  = this.bitmap.data[idx + 2];
-                    const gray =  (0.299 * red + 0.587 * green + 0.114 * blue);
-                    if ( gray > thresh )
-                    {
-                        // Set the pixel is white.
-                        this.bitmap.data[idx] = 255;
-                        this.bitmap.data[idx + 1] = 255;
-                        this.bitmap.data[idx + 2] = 255;
-                        this.bitmap.data[idx + 3] = 255;
+            const compute = fork(path.join(__dirname, 'forks/ocr.js'));
+            compute.send(url);
+            compute.on('message', (text) => {
+                let mentions: Array<GuildMember> = [];
+                names.forEach((value, key) => {
+                    if (text.indexOf(key) > -1) {
+                        mentions.push(value);
                     }
-                    else
-                    {
-                        // Set the pixel is black.
-                        this.bitmap.data[idx] = 0;
-                        this.bitmap.data[idx + 1] = 0;
-                        this.bitmap.data[idx + 2] = 0;
-                        this.bitmap.data[idx + 3] = 255;
-                    }
-                }).getBuffer(value.getMIME(), (err: Error, buffer: Buffer) => {
-                    Tesseract.recognize(buffer, {
-                        lang: path.join(__dirname, "../langs/eng"),
-                        tessedit_pageseg_mode: 4
-                    })
-                        .progress(function  (p: Progress) { console.log('progress', p)  })
-                        .then((result: Page) => {
-                            // console.log(result.lines);
-                            let mentions: Array<GuildMember> = [];
-                            names.forEach((value, key) => {
-                                if (result.text.indexOf(key) > -1) {
-                                    mentions.push(value);
-                                }
-                            });
-                            mentions.forEach(value => message.reply('got got', { reply: value}))
-                        })
-                        .catch((err: Error) => console.error(err))
-                        .finally((resultOrError) => {
-                            if ('text' in resultOrError) {
-                                console.log(resultOrError.text)
-                            }
-                        });
                 });
-            });
+                mentions.forEach(value => message.reply('got got', { reply: value}))
+            })
         }
     }
 }
