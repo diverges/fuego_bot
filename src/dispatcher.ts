@@ -117,17 +117,19 @@ export default class CommandDispatcher extends EventEmitter {
             }
         }
         for (const url of media) {
-            const compute = fork(path.join(__dirname, 'forks/ocr.js'));
-            compute.send(url);
-            compute.on('message', (text) => {
-                let mentions: Array<GuildMember> = [];
-                names.forEach((value, key) => {
-                    if (text.indexOf(key) > -1) {
-                        mentions.push(value);
-                    }
-                });
-                mentions.forEach(value => message.reply('got got', { reply: value}))
-            })
+            if (url.indexOf('.png') > -1) {
+                const compute = fork(path.join(__dirname, 'forks/ocr.js'));
+                compute.send(url);
+                compute.on('message', (text) => {
+                    let mentions: Array<GuildMember> = [];
+                    names.forEach((value, key) => {
+                        if (text.indexOf(key) > -1) {
+                            mentions.push(value);
+                        }
+                    });
+                    mentions.forEach(value => message.reply('got got', { reply: value}))
+                })
+            }
         }
     }
 }
