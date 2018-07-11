@@ -104,22 +104,6 @@ export default class CommandDispatcher extends EventEmitter {
         this.on(command.getName(), command.onCallback);
     }
 
-    public censor(censor: any): any {
-        var i = 0;
-
-        return (key: any, value: any) => {
-            if(i !== 0 && typeof(censor) === 'object' && typeof(value) == 'object' && censor == value)
-                return '[Circular]';
-
-            if(i >= 29) // seems to be a harded maximum of 30 serialized objects?
-                return '[Unknown]';
-
-            ++i; // so we know we aren't using the original object anymore
-
-            return value;
-        }
-    }
-
     public checkImageForUsers(message: Discord.Message): void {
         let media: Array<string> = [];
         for (const em of message.embeds) {
@@ -138,7 +122,6 @@ export default class CommandDispatcher extends EventEmitter {
             Jimp.read(url).then(value => {
                 const contrastLVL = 0.6;
                 const thresh = 30;
-                console.log('downloaded image');
                 value.scaleToFit(value.bitmap.width*2, value.bitmap.height*2).contrast(contrastLVL).scan(0, 0, value.bitmap.width, value.bitmap.height, function (x, y, idx) {
                     const red   = this.bitmap.data[idx ];
                     const green = this.bitmap.data[idx + 1];
