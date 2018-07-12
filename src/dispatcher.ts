@@ -56,7 +56,7 @@ export default class CommandDispatcher extends EventEmitter {
         } else if (message.cleanContent.length < 15) {
             const fd = FuzzySet(['now what', 'what now']);
             const res = fd.get(message.cleanContent, undefined, 0.75);
-            if (res[0] && res[0][0] > 0.8) {
+            if (res && res[0] && res[0][0] > 0.8) {
                 message.reply('🍆', {reply: message.author});
             }
         }
