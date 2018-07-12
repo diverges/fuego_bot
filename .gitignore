@@ -6,3 +6,5 @@ node_modules/
 
 # User input config file
 config/init.txt
+
+.idea/
