@@ -32,11 +32,12 @@ process.on('message', (msg) => {
                 tessedit_pageseg_mode: 4
             })
                 .progress(function  (p: Progress) { console.log('progress', p);  })
-                .catch((err: Error) => console.error(err))
+                .catch((err: Error) => console.error('ocr error', err))
                 .finally((resultOrError) => {
                     if ('text' in resultOrError) {
                         // console.log(resultOrError.text);
                         process.send(resultOrError.text);
+                        process.exit();
                     }
                 });
         });
