@@ -8,20 +8,18 @@ import { GetTurkey } from './intent';
 import { Config } from './config.js';
 
 let running: boolean = false;
-Config.Instance = Load.getConfig();
+Config.Instance = Load.loadConfig();
 
 class App {
     private client: Discord.Client;
     private dispatcher: Dispatcher;
-    private config: any;
 
     constructor() {
         this.client = new Discord.Client();
-        this.config = Config.Instance;
     }
 
     public async login(): Promise<void> {
-        if (!this.config.init['discord_token']) {
+        if (!Config.Instance.init['discord_token']) {
             throw new Error('Discord token in config/init must be defined.');
         }
 
@@ -30,15 +28,14 @@ class App {
 
         // Login
         console.log('Logging client in...');
-        await this.client.login(this.config.init['discord_token']);
+        await this.client.login(Config.Instance.init['discord_token']);
 
         // Events
         this.client.on('message', this.dispatcher.onMessage.bind(this.dispatcher));
-        running = true;
     }
 
     initDispatcher(): void {
-        this.dispatcher = new Dispatcher(this.config);
+        this.dispatcher = new Dispatcher();
 
         // commands
         this.dispatcher.addCommand(new Ping());
@@ -66,9 +63,11 @@ const MainApp: App = new App();
 
 process.on('SIGINT', () => MainApp.onExit());
 
-MainApp.login().catch(error => {
-    console.log(error);
-    this.exit();
-});
+MainApp.login()
+    .then( () => { running = true; })
+    .catch(error => {
+        console.log(error);
+        this.exit();
+    });
 
 export default MainApp;

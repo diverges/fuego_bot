@@ -11,7 +11,8 @@
         ],
         "indent": [
             true,
-            "spaces"
+            "spaces",
+            4
         ],
         "one-line": [
             true,

@@ -2,30 +2,15 @@ import * as EventEmitter from 'events';
 import * as Discord from 'discord.js';
 import { Wit, MessageResponse } from 'node-wit'; // Wit.ai
 import { BaseCommand } from './baseCommand';
-
-// Guild -> (Upvote, Downvote)
-class EmojiCollection {
-    [id: string]: {
-        Upvote: string, Downvote: string
-    }
-
-    static get Default(): { Upvote: string, Downvote: string } {
-        return { Upvote: '🔥', Downvote: '🍆'}; // default
-    }
-}
+import { Config } from './config';
 
 export default class CommandDispatcher extends EventEmitter {
-    private config: any;
     private witAi: Wit;
-    private emojiCache: EmojiCollection; // Emoji id's per guild
+    private readonly config: any;
 
-    constructor(config: any) {
+    constructor() {
         super();
-        this.config = config;
-        this.emojiCache = new EmojiCollection();
-        if (config && config.init) {
-            this.witAi = (config.init['wit_token']) ? new Wit({ accessToken: config.init['wit_token'] }) : undefined;
-        }
+        this.config = Config.Instance;
     }
 
     public async onMessage (message: Discord.Message): Promise<void> {
