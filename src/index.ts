@@ -1,25 +1,26 @@
 import * as Discord from 'discord.js';
 import Load from './load.js';
-import Dispatcher from './dispatcher.js';
+import { Dispatcher } from './dispatcher.js';
 
 // commands
 import { Ping, Wrong, Sue } from './commands';
 import { GetTurkey } from './intent';
+import { Config } from './config.js';
+import { CommandResolver, WitAiResolver, MediaVotingResolver } from './resolver/index.js';
 
 let running: boolean = false;
+Config.Instance = Load.loadConfig();
 
 class App {
     private client: Discord.Client;
     private dispatcher: Dispatcher;
-    private config: any;
 
     constructor() {
         this.client = new Discord.Client();
-        this.config = Load.getConfig();
     }
 
     public async login(): Promise<void> {
-        if (!this.config.init['discord_token']) {
+        if (!Config.Instance.init['discord_token']) {
             throw new Error('Discord token in config/init must be defined.');
         }
 
@@ -28,25 +29,19 @@ class App {
 
         // Login
         console.log('Logging client in...');
-        await this.client.login(this.config.init['discord_token']);
+        await this.client.login(Config.Instance.init['discord_token']);
 
         // Events
-        this.client.on('message', this.dispatcher.OnMessage.bind(this.dispatcher));
-        this.client.on('emojiUpdate', (oldEmoji, newEmoji: Discord.Emoji) => {
-            this.dispatcher.OnEmojiUpdate(newEmoji);
-        });
-        this.client.on('emojiDelete', this.dispatcher.OnEmojiDelete.bind(this.dispatcher));
-        this.client.on('messageUpdate', (oldMessage: Discord.Message, newMessage: Discord.Message) => {
-            if (newMessage.embeds.length > 0 || newMessage.attachments.array().length > 0) {
-                this.dispatcher.sendUpvoteDownvote(newMessage);
-            }
-        });
-
-        running = true;
+        this.client.on('message', this.dispatcher.onMessage.bind(this.dispatcher));
     }
 
     initDispatcher(): void {
-        this.dispatcher = new Dispatcher(this.config);
+        this.dispatcher = new Dispatcher(this.client);
+
+        // message resolvers
+        this.dispatcher.addResolver(new CommandResolver(this.dispatcher));
+        this.dispatcher.addResolver(new WitAiResolver(this.dispatcher));
+        this.dispatcher.addResolver(new MediaVotingResolver());
 
         // commands
         this.dispatcher.addCommand(new Ping());
@@ -58,12 +53,9 @@ class App {
     }
 
     onExit(): void {
-        console.log('App closing...');
         if (running) {
             running = false;
-            console.log('Closing client...');
             this.client.destroy().then(function () {
-                console.log('Client closed!');
                 process.exit();
             });
         }
@@ -74,9 +66,11 @@ const MainApp: App = new App();
 
 process.on('SIGINT', () => MainApp.onExit());
 
-MainApp.login().catch(error => {
-    console.log(error);
-    this.exit();
-});
+MainApp.login()
+    .then( () => { running = true; })
+    .catch(error => {
+        console.log(error);
+        this.exit();
+    });
 
 export default MainApp;

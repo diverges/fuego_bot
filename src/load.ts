@@ -3,19 +3,9 @@ const configDir = 'config/';
 const cmdDir = 'src/commands/';
 
 export default class Load {
-    public static getConfig() {
-        const config = Load.loadConfig();
-
-        // overwrite config with prod settings
-        if (config._prod_init !== undefined) {
-            config.init = config._prod_init;
-        }
-        return config;
-    }
-
     // Loads all files in config/ folder as JS objects
     // for easy referencing.
-    private static loadConfig(): any {
+    public static loadConfig(): any {
         const getFileStr = (name: string) => name.substr(0, name.indexOf('.'));
         const filenames = fs.readdirSync(configDir);
         const commandNames = fs.readdirSync(cmdDir).filter(elem => elem != 'index');
