@@ -1,11 +1,12 @@
 import * as Discord from 'discord.js';
 import Load from './load.js';
-import Dispatcher from './dispatcher.js';
+import { Dispatcher } from './dispatcher.js';
 
 // commands
 import { Ping, Wrong, Sue } from './commands';
 import { GetTurkey } from './intent';
 import { Config } from './config.js';
+import { CommandResolver, WitAiResolver, MediaVotingResolver } from './resolver/index.js';
 
 let running: boolean = false;
 Config.Instance = Load.loadConfig();
@@ -35,7 +36,12 @@ class App {
     }
 
     initDispatcher(): void {
-        this.dispatcher = new Dispatcher();
+        this.dispatcher = new Dispatcher(this.client);
+
+        // message resolvers
+        this.dispatcher.addResolver(new CommandResolver(this.dispatcher));
+        this.dispatcher.addResolver(new WitAiResolver(this.dispatcher));
+        this.dispatcher.addResolver(new MediaVotingResolver());
 
         // commands
         this.dispatcher.addCommand(new Ping());
@@ -47,12 +53,9 @@ class App {
     }
 
     onExit(): void {
-        console.log('App closing...');
         if (running) {
             running = false;
-            console.log('Closing client...');
             this.client.destroy().then(function () {
-                console.log('Client closed!');
                 process.exit();
             });
         }

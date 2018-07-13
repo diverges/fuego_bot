@@ -31,7 +31,6 @@ export class GetTurkey extends BaseCommand {
         const thursday = 4;
         while (turkeyDate.getDay() != thursday) {
             turkeyDate.setDate(turkeyDate.getDate() + 1);
-            console.log(turkeyDate);
         }
         // Add 3 weeks
         turkeyDate.setDate(turkeyDate.getDate() + 21);

@@ -13,7 +13,9 @@ export class MediaVotingResolver implements Resolver {
         client.on('emojiUpdate', (oldEmoji, newEmoji: Emoji) => {
             this.emojiCache.onUpdate(newEmoji);
         });
-        client.on('emojiDelete', this.emojiCache.onDelete);
+        client.on('emojiDelete', (emoji: Emoji) => {
+            this.emojiCache.onDelete(emoji);
+        });
         client.on('messageUpdate', (oldMessage: Message, newMessage: Message) => {
             if (newMessage.embeds.length > 0 || newMessage.attachments.array().length > 0) {
                 this.onMessage(newMessage);
