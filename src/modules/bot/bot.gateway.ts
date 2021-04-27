@@ -5,6 +5,7 @@ import { Message } from 'discord.js'
 import { AddFeedCommand } from './commands/add-feed.command'
 // import { GetTurkeyCommand } from './commands/get-turkey.command'
 import { PingCommand } from './commands/ping.command'
+import { SueCommand } from './commands/sue.command'
 import { WakeUpCommand } from './commands/wake-up.command'
 import { WrongCommand } from './commands/wrong.command'
 import { OnMessageEvent } from './events/on-message.event'
@@ -23,6 +24,11 @@ export class BotGateway {
     @OnCommand({ name: 'wrong' })
     async onWrong(@Content() content: string, @Context() [context]: [Message]): Promise<void> {
         return this.commandBus.execute(new WrongCommand(content, context))
+    }
+
+    @OnCommand({ name: 'sue' })
+    async onsue(@Content() content: string, @Context() [context]: [Message]): Promise<void> {
+        return this.commandBus.execute(new SueCommand(content, context))
     }
 
     @OnCommand({ name: 'ping' })
