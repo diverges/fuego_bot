@@ -51,4 +51,9 @@ export class BotGateway {
         if (message.author.bot) return
         this.eventBus.publish(new OnMessageEvent(message))
     }
+
+    @On({ event: 'emojiUpdate' })
+    async onEmojiUpdate(oldEmoji: any, newEmoji: any): Promise<void> {
+        console.log(oldEmoji, newEmoji)
+    }
 }

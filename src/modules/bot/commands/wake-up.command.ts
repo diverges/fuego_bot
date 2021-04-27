@@ -9,8 +9,13 @@ export class WakeUpCommand {
 export class WakeUpCommandHandler implements ICommandHandler<WakeUpCommand> {
     async execute(command: WakeUpCommand) {
         if (command.content.length > 0) {
-            const user = command.context.mentions.users.first()
-            await command.context.channel.send(' needs to wake up!', { reply: user })
+            const replies = command.context.mentions.users.map((user) =>
+                command.context.channel.send(`${command.context.guild?.member(user)?.nickname ?? user.username}, needs to wake up!`)
+            )
+            if (replies.length === 0) {
+                replies.push(command.context.reply('needs to wake up!'))
+            }
+            await Promise.allSettled(replies)
         } else {
             await command.context.reply(' wake up!')
         }

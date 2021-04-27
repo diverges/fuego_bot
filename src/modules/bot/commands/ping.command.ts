@@ -8,7 +8,9 @@ export class PingCommand {
 @CommandHandler(PingCommand)
 export class PingCommandHandler implements ICommandHandler<PingCommand> {
     async execute(command: PingCommand) {
-        const replies = command.context.mentions.users.map((user) => command.context.channel.send('suck it!', { reply: user }))
+        const replies = command.context.mentions.users.map((user) =>
+            command.context.channel.send(`${command.context.guild?.member(user)?.nickname ?? user.username}, suck it!`)
+        )
         if (replies.length === 0) {
             replies.push(command.context.reply('suck it!'))
         }
