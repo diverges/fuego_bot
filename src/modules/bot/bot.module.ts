@@ -1,8 +1,8 @@
-import { InMemoryDBModule } from '@nestjs-addons/in-memory-db'
 import { Module } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { CqrsModule } from '@nestjs/cqrs'
 import { DiscordModule } from 'discord-nestjs'
+import { TasksModule } from '../tasks/tasks.module'
 import { BotGateway } from './bot.gateway'
 import { BotService } from './bot.service'
 import { AddFeedCommandHandler } from './commands/add-feed.command'
@@ -13,21 +13,23 @@ import { WakeUpCommandHandler } from './commands/wake-up.command'
 import { WrongCommandHandler } from './commands/wrong.command'
 import { DiscordConfigService } from './discord-config-service'
 import { OnMessageEventHandler } from './events/on-message.event'
+import { ChannelQueryHandler } from './queries/channel.query'
 import { BotSagas } from './sagas/bot.sagas'
 
 const CommandHandlers = [WrongCommandHandler, PingCommandHandler, SueCommandHandler, AddFeedCommandHandler, GetTurkeyCommandHandler, WakeUpCommandHandler]
+const QueryHandlers = [ChannelQueryHandler]
 const EventHandlers = [OnMessageEventHandler]
 
 @Module({
     imports: [
         CqrsModule,
-        InMemoryDBModule,
+        TasksModule,
         DiscordModule.forRootAsync({
             inject: [ConfigService],
             useClass: DiscordConfigService
         })
     ],
-    providers: [BotGateway, BotService, ...CommandHandlers, ...EventHandlers, BotSagas],
+    providers: [BotGateway, BotService, ...QueryHandlers, ...CommandHandlers, ...EventHandlers, BotSagas],
     exports: [BotService]
 })
 export class BotModule {}

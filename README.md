@@ -10,6 +10,9 @@ Community run discord bot for learning purposes only.
 $ npm install
 ```
 
+copy .example.env and rename to .env
+input required tokens
+
 ## Running the app
 
 ```bash
