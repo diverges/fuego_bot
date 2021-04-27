@@ -21,7 +21,7 @@ export class RssFeedCommandHandler implements ICommandHandler<RssFeedCommand> {
             try {
                 const channel = (await this.queryBus.execute<ChannelQuery, Channel | undefined>(new ChannelQuery(feed.channelId))) as TextChannel | undefined
                 if (!channel) throw new Error('channel does not exists!')
-                const lastMessages = await channel.messages.fetch({ limit: 10 })
+                const lastMessages = await channel.messages.fetch({ limit: 50 })
                 const posts = await this.queryBus.execute<RssFeedQuery, RssFeedEntry[]>(new RssFeedQuery(feed.url))
                 if (!posts || !posts.length) return
                 if (lastMessages.filter((messsage) => messsage.content.includes(posts[0].link)).size > 0 && !command.override) return
